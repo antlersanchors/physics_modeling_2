@@ -3,8 +3,8 @@
 #include <EEPROM.h>
 #include <M3T3.h>
 
-float k = 8.3; // spring stiffness
-float m = 5.0; // mass
+float k = 5.3; // spring stiffness
+float m = 7.0; // mass
 float d = 0.02; // damping coefficient
 
 float x; // virtual position
@@ -17,10 +17,10 @@ int last_pos = 0;
 int c = 0;
 
 void setup() {
-
-  MotorB.init();
+  Music.init();
+  MotorA.init();
   tick = millis();
-  last_pos = analogRead(A9);
+  last_pos = analogRead(A1);
 
 }
 
@@ -29,7 +29,7 @@ void loop() {
   long tick_now = millis();
   float dt = (float)(tick_now - tick) / 100;
 
-  int current_pos = analogRead(A9);
+  int current_pos = analogRead(A1);
 
   int dx = last_pos - current_pos;
 
@@ -37,7 +37,10 @@ void loop() {
   v += (f / m) * dt;
   x += v * dt;
 
-  MotorB.torque(f);
+  MotorA.torque(f);
+  
+  int freq_val = map((abs)f, 0, 500, 500, 1200);
+  Music.setFrequency(freq_val);
   
   tick = millis();
   last_pos = current_pos;
