@@ -3,8 +3,8 @@
 #include <EEPROM.h>
 #include <M3T3.h>
 
-float k = 5.3; // spring stiffness
-float m = 7.0; // mass
+float k = 0.3; // spring stiffness
+float m = 1.0; // mass
 float d = 0.02; // damping coefficient
 
 float x; // virtual position
@@ -18,9 +18,9 @@ int c = 0;
 
 void setup() {
   Music.init();
-  MotorA.init();
+  MotorB.init();
   tick = millis();
-  last_pos = analogRead(A1);
+  last_pos = analogRead(A9);
 
 }
 
@@ -29,21 +29,28 @@ void loop() {
   long tick_now = millis();
   float dt = (float)(tick_now - tick) / 100;
 
-  int current_pos = analogRead(A1);
+  int current_pos = analogRead(A9);
 
   int dx = last_pos - current_pos;
 
-  f = k * (dx - x) - (d * v);
+  f = k * (current_pos - x) - (d * v);
   v += (f / m) * dt;
   x += v * dt;
 
-  MotorA.torque(f);
-  
-  int freq_val = map((abs)f, 0, 500, 500, 1200);
-  Music.setFrequency(freq_val);
-  
-  tick = millis();
-  last_pos = current_pos;
-  
-  Serial.println(f);
-}
+  if (f < 200 && f > -200) {
+    Serial.print("INSUFFICIENT TORQUE! ");
+    Serial.println("f");
+  }
+
+    MotorB.torque(f);
+
+    int abs_f = abs(f);
+
+    int freq_val = map(abs_f, 0, 800, 500, 1200);
+    Music.setFrequency(freq_val);
+
+    tick = millis();
+    last_pos = current_pos;
+
+    Serial.println(abs_f);
+  }
